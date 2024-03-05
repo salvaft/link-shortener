@@ -1,4 +1,4 @@
-package main
+package utils
 
 func CHARS() [64]rune {
 	return [64]rune{
@@ -8,26 +8,31 @@ func CHARS() [64]rune {
 	}
 }
 
-func decimalToBase64(decimalNumber int) string {
+func DecimalToBase64(decimalNumber int) string {
 	var result string
+	// TODO: change this to return error
+	// if decimalNumber < 1 {
+	// 	return "A"
+	// }
 
 	for decimalNumber > 0 {
+		decimalNumber -= 1
 		remainder := decimalNumber % 64
 		result = string(CHARS()[remainder]) + result
 		decimalNumber /= 64
 	}
 
-	if result == "" {
-		result = "A"
-	}
+	// if result == "" {
+	// 	result = "A"
+	// }
 
 	return result
 }
 
-func base64ToDecimal(base64Number string) int {
+func Base64ToDecimal(base64Number string) int {
 	var result int
 	for _, character := range base64Number {
-		result = result*64 + indexOf(character)
+		result = result*64 + indexOf(character) + 1
 	}
 	return result
 }
@@ -158,7 +163,7 @@ func indexOf(character rune) int {
 		return 60
 	case '9':
 		return 61
-	case '+':
+	case '-':
 		return 62
 	case '_':
 		return 63
