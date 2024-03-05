@@ -1,0 +1,20 @@
+package components
+
+import (
+	"github.com/salvaft/go-link-shortener/persistance"
+	"github.com/salvaft/go-link-shortener/cfg"
+	"fmt"
+)
+
+func config() cfg.Config {
+	var config = cfg.InitConfig()
+	return config
+}
+
+templ LinkEntry(link *persistance.Link) {
+	// TODO: add a copy button
+	<a href={ templ.URL("/" + link.B64_code) } class="flex flex-col pb-3">
+		<dd class="text-lg font-semibold">{ config().Host+":" + config().Port+"/" + link.B64_code }</dd>
+		<dt class="mb-1 text-gray-500 md:text-lg dark:text-gray-400">{ fmt.Sprint(link.Href) }</dt>
+	</a>
+}
