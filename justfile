@@ -2,15 +2,16 @@ start:
     air
 
 build:
-	tailwindcss -i public/css/styles.css -o public/styles.css
-	@templ generate view
-	@go build -o bin/fullstackgo main.go 
+	tailwindcss -i views/css/styles.css -o public/styles.css
+	templ generate views
+	go build -o bin/main . 
+	cd js && pnpm run build
 
 test:
 	@go test -v ./...
 	
 run: build
-	@./bin/fullstackgo
+	@./bin/main
 
 tailwind:
 	@tailwindcss -i views/css/styles.css -o public/styles.css --watch
