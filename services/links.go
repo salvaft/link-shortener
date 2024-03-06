@@ -1,7 +1,6 @@
 package services
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -23,6 +22,7 @@ func NewLinkService(store persistance.Store) *LinkService {
 
 func (s *LinkService) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /", s.handleCreateLink)
+	mux.HandleFunc("POST /link", s.handleSavedLink)
 	mux.HandleFunc("GET /{link}/", s.handleGetLink)
 }
 
@@ -44,6 +44,36 @@ func (s *LinkService) handleGetLink(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (s *LinkService) handleSavedLink(w http.ResponseWriter, r *http.Request) {
+	// Progressive enhacement. Handles the post requests from htmx
+	// The post request might come from the form or from the javascript
+	// in order to create link elements based on local storage
+	// We might use the same endpoint for both casees if checking the headers
+	// but the handler gets more complex
+	log.Printf("%-20s request received. Path: %v", "handleSavedLink", r.URL.Path)
+	// Validate CSRF token
+	if !utils.ValidateCSRFToken(r) {
+		w.WriteHeader(http.StatusForbidden)
+		fmt.Fprintf(w, "Forbidden")
+		return
+	}
+	href := r.FormValue("href")
+	index, err := s.store.FindURL(href)
+	if err != nil {
+		log.Printf("%-20s request received. Error: %v", "handleGetLink", err)
+		w.WriteHeader(http.StatusNotFound)
+		fmt.Fprintf(w, "Link not found")
+		return
+	}
+	linkCode := utils.DecimalToBase64(index)
+	link := persistance.Link{
+		B64_code: linkCode,
+		Href:     href,
+		Id:       index,
+		Url:      fmt.Sprintf("%s/%s", cfg.InitConfig().Host, linkCode),
+	}
+	components.LinkEntry(&link).Render(r.Context(), w)
+}
 
 func (s *LinkService) handleCreateLink(w http.ResponseWriter, r *http.Request) {
 	log.Printf("%-20s request received. Path: %v", "handleCreateLink", r.URL.Path)
@@ -82,25 +112,12 @@ func (s *LinkService) handleCreateLink(w http.ResponseWriter, r *http.Request) {
 	url_code := utils.DecimalToBase64(url_id)
 	full_url := fmt.Sprintf("%s/%s", cfg.InitConfig().Host, url_code)
 	link := persistance.Link{B64_code: url_code, Href: href, Id: url_id, Url: full_url}
-	// Progressive enhancement we respond with json
-	if _, ok := r.Header["X-From-Js"]; ok {
-		// TODO: Fix this marshaling
-		b, err := json.Marshal(map[string]string{"href": href, "url": link.Url})
-		if err != nil {
-			log.Printf("%-20s Error marshaling json. Error: %v", "handleCreateLink", err)
-		}
-		w.Header().Set("Content-Type", "application/json")
-		w.Write(b)
+	csrfToken, err := utils.SetCSRFToken(w)
+	if err != nil {
+		log.Printf("%-20s Error generating CSRF token. Error: %v", "handleCreateLink", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		views.ErrorView("Internal Server Error").Render(r.Context(), w)
 		return
-		// Normal response we have to set a new csrf token
-	} else {
-		csrfToken, err := utils.SetCSRFToken(w)
-		if err != nil {
-			log.Printf("%-20s Error generating CSRF token. Error: %v", "handleCreateLink", err)
-			w.WriteHeader(http.StatusInternalServerError)
-			views.ErrorView("Internal Server Error").Render(r.Context(), w)
-			return
-		}
-		views.Home(true, csrfToken, &link).Render(r.Context(), w)
 	}
+	views.Home(true, csrfToken, &link).Render(r.Context(), w)
 }
