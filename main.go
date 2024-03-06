@@ -11,6 +11,8 @@ import (
 	"github.com/salvaft/go-link-shortener/views"
 )
 
+// TODO: Add dockerfile
+// TODO: Add readme
 func main() {
 	cfg := cfg.InitConfig()
 	mux := http.NewServeMux()
@@ -26,7 +28,7 @@ func main() {
 	store := persistance.NewStorage(db)
 	linkService := services.NewLinkService(store)
 	linkService.RegisterRoutes(mux)
-
+	log.Printf("%-20s Server running on http://%s:%s", "main", cfg.Host, cfg.Port)
 	if err := http.ListenAndServe(":8000", mux); err != nil {
 		log.Fatalf("%-20s Error starting server. Error: %v", "main", err)
 	}
