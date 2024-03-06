@@ -5,13 +5,12 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"net/url"
 
 	"github.com/salvaft/go-link-shortener/cfg"
+	"github.com/salvaft/go-link-shortener/components"
 	"github.com/salvaft/go-link-shortener/persistance"
-	"github.com/salvaft/go-link-shortener/views"
-
 	"github.com/salvaft/go-link-shortener/utils"
+	"github.com/salvaft/go-link-shortener/views"
 )
 
 type LinkService struct {
@@ -45,6 +44,7 @@ func (s *LinkService) handleGetLink(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+
 func (s *LinkService) handleCreateLink(w http.ResponseWriter, r *http.Request) {
 	log.Printf("%-20s request received. Path: %v", "handleCreateLink", r.URL.Path)
 	// Validate CSRF token
@@ -54,16 +54,9 @@ func (s *LinkService) handleCreateLink(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// TODO: vALIDAte url
-	raw_url := r.FormValue("url")
-	parsedUrl, err := url.Parse(raw_url)
-	if err != nil {
-		log.Printf("%-20s Error parsing URL. Error: %v", "handleCreateLink", err)
-		w.WriteHeader(http.StatusBadRequest)
-		views.ErrorView("Bad request").Render(r.Context(), w)
-		return
-	}
+	href := r.FormValue("href")
 	var isPresent bool
-	url_id, err := s.store.FindURL(fmt.Sprint(parsedUrl))
+	url_id, err := s.store.FindURL(href)
 	if _, ok := err.(*persistance.URLNotFound); ok {
 		// Should create the link
 		isPresent = false
@@ -78,7 +71,7 @@ func (s *LinkService) handleCreateLink(w http.ResponseWriter, r *http.Request) {
 	}
 	if !isPresent {
 		// Creating the link
-		url_id, err = s.store.CreateLink(fmt.Sprint(parsedUrl))
+		url_id, err = s.store.CreateLink(href)
 		if err != nil {
 			log.Printf("%-20s Error creating new link. Error: %v", "handleCreateLink", err)
 			w.WriteHeader(http.StatusInternalServerError)
@@ -88,11 +81,11 @@ func (s *LinkService) handleCreateLink(w http.ResponseWriter, r *http.Request) {
 	}
 	url_code := utils.DecimalToBase64(url_id)
 	full_url := fmt.Sprintf("%s/%s", cfg.InitConfig().Host, url_code)
-	link := persistance.Link{B64_code: url_code, Href: parsedUrl, Id: url_id, Url: full_url}
+	link := persistance.Link{B64_code: url_code, Href: href, Id: url_id, Url: full_url}
 	// Progressive enhancement we respond with json
 	if _, ok := r.Header["X-From-Js"]; ok {
 		// TODO: Fix this marshaling
-		b, err := json.Marshal(map[string]string{"href": fmt.Sprint(parsedUrl), "url": link.Url})
+		b, err := json.Marshal(map[string]string{"href": href, "url": link.Url})
 		if err != nil {
 			log.Printf("%-20s Error marshaling json. Error: %v", "handleCreateLink", err)
 		}
