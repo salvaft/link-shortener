@@ -8,12 +8,9 @@ import (
 
 templ Home(addLink bool, csrf string, link *persistance.Link) {
 	@Base(true)
-	<main class="flex flex-col gap-8 max-w-xl mx-auto">
-		<header>
-			<h1 class="text-teal-300">Home</h1>
-		</header>
+	<main class="flex my-4 flex-col gap-8 max-w-xl mx-auto">
 		<section>
-			<form class="max-w-md mx-auto" action="/" method="post" hx-target="#recent" hx-post="/link" hx-swap="beforeend">
+			<form class="max-w-md" action="/" method="post" hx-target="#recent" hx-post="/" hx-swap="beforeend">
 				<div class="relative z-0 w-full mb-5 group">
 					<input
 						type="text"
@@ -40,7 +37,7 @@ templ Home(addLink bool, csrf string, link *persistance.Link) {
 			</form>
 		</section>
 		<section>
-			<h2 class="text-4xl text-teal-400 mb-4">Recent URLs</h2>
+			<h2 class="text-3xl text-teal-400 mb-4">Recent URLs</h2>
 			<dl id="recent" class="max-w-md text-gray-900 divide-y divide-gray-200 dark:text-white dark:divide-gray-700">
 				if addLink {
 					@components.LinkEntry(link)
