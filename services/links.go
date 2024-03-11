@@ -27,18 +27,18 @@ func (s *LinkService) RegisterRoutes(mux *http.ServeMux) {
 }
 
 func (s *LinkService) handleGetLink(w http.ResponseWriter, r *http.Request) {
-	log.Printf("%-20s request received. Path: %v", "handleGetLink", r.URL.Path)
+	log.Printf("%-20s Request received. Path: %v", "handleGetLink", r.URL.Path)
 	linkCode := r.PathValue("link")
 	decimal_link := utils.Base64ToDecimal(linkCode)
 	link, err := s.store.GetLink(decimal_link)
 
 	if err != nil {
-		log.Printf("%-20s request received. Error: %v", "handleGetLink", err)
+		log.Printf("%-20s Error getting link in db. Error: %v", "handleGetLink", err)
 		w.WriteHeader(http.StatusNotFound)
 		views.ErrorView("Not found").Render(r.Context(), w)
 		return
 	} else {
-		log.Printf("%-20s request received. Link: %v", "handleGetLink", link)
+		log.Printf("%-20s Redirecting. Link: %v", "handleGetLink", link)
 		http.Redirect(w, r, link, http.StatusMovedPermanently)
 		return
 	}
@@ -50,7 +50,7 @@ func (s *LinkService) handleSavedLink(w http.ResponseWriter, r *http.Request) {
 	// in order to create link elements based on local storage
 	// We might use the same endpoint for both casees if checking the headers
 	// but the handler gets more complex
-	log.Printf("%-20s request received. Path: %v", "handleSavedLink", r.URL.Path)
+	log.Printf("%-20s Request received. Path: %v", "handleSavedLink", r.URL.Path)
 	// Validate CSRF token
 	if !utils.ValidateCSRFToken(r) {
 		w.WriteHeader(http.StatusForbidden)
@@ -60,7 +60,7 @@ func (s *LinkService) handleSavedLink(w http.ResponseWriter, r *http.Request) {
 	href := r.FormValue("href")
 	index, err := s.store.FindURL(href)
 	if err != nil {
-		log.Printf("%-20s request received. Error: %v", "handleGetLink", err)
+		log.Printf("%-20s URL not found in server. Error: %v", "handleGetLink", err)
 		w.WriteHeader(http.StatusNotFound)
 		fmt.Fprintf(w, "Link not found")
 		return
@@ -76,11 +76,13 @@ func (s *LinkService) handleSavedLink(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *LinkService) handleCreateLink(w http.ResponseWriter, r *http.Request) {
-	log.Printf("%-20s request received. Path: %v", "handleCreateLink", r.URL.Path)
+	log.Printf("%-20s Request received. Path: %v", "handleCreateLink", r.URL.Path)
 	// Validate CSRF token
 	if !utils.ValidateCSRFToken(r) {
 		w.WriteHeader(http.StatusForbidden)
 		views.ErrorView("Forbidden").Render(r.Context(), w)
+
+		log.Printf("%-20s csrf token not valid", "handleCreateLink")
 		return
 	}
 	// TODO: vALIDAte url
@@ -119,5 +121,11 @@ func (s *LinkService) handleCreateLink(w http.ResponseWriter, r *http.Request) {
 		views.ErrorView("Internal Server Error").Render(r.Context(), w)
 		return
 	}
+	if r.Header.Get("Hx-Request") != "" {
+		// w.Header().Add(, value string)
+		components.LinkEntry(&link).Render(r.Context(), w)
+		return
+	}
+
 	views.Home(true, csrfToken, &link).Render(r.Context(), w)
 }
