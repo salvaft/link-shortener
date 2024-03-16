@@ -11,7 +11,7 @@ import (
 // TODO: Unit test with mock storage
 
 func TestHealthService_E2E(t *testing.T) {
-	config := cfg.InitConfig()
+	config := cfg.GetConfig()
 	apiURL := "http://" + config.Host + ":" + config.Port + "/healthzz/"
 
 	response, err := http.Get(apiURL)
@@ -28,7 +28,7 @@ func TestHealthService_E2E(t *testing.T) {
 }
 
 func TestLinkService_RegisterRoutes_E2E(t *testing.T) {
-	config := cfg.InitConfig()
+	config := cfg.GetConfig()
 
 	apiURL := "http://" + config.Host + ":" + config.Port + "/create/"
 

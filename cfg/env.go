@@ -6,13 +6,15 @@ type Config struct {
 	DbName string
 	Port   string
 	Host   string
+	Secret string
 }
 
-func InitConfig() Config {
+func GetConfig() Config {
 	return Config{
 		DbName: getEnv("DB_NAME", "db.sqlite3"),
 		Port:   getEnv("PORT", "8000"),
 		Host:   getEnv("HOST", "localhost"),
+		Secret: getEnv("CSRF_SECRET", "secret"),
 	}
 }
 
