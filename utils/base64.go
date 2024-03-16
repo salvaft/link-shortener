@@ -10,10 +10,7 @@ func CHARS() [64]rune {
 
 func DecimalToBase64(decimalNumber int) string {
 	var result string
-	// TODO: change this to return error
-	// if decimalNumber < 1 {
-	// 	return "A"
-	// }
+	// TODO: check decimalNumber is not negative
 
 	for decimalNumber > 0 {
 		decimalNumber -= 1
@@ -21,10 +18,6 @@ func DecimalToBase64(decimalNumber int) string {
 		result = string(CHARS()[remainder]) + result
 		decimalNumber /= 64
 	}
-
-	// if result == "" {
-	// 	result = "A"
-	// }
 
 	return result
 }
