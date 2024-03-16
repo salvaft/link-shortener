@@ -1,8 +1,8 @@
 package persistance
 
 type Link struct {
-	Href     string
-	B64_code string
-	Url      string
-	Id       int
+	Href     string `json:"href"`
+	B64_code string `json:"b64_code"`
+	Url      string `json:"url"`
+	Id       int    `json:"id"`
 }
