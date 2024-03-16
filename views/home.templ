@@ -6,11 +6,11 @@ import (
 	"github.com/salvaft/go-link-shortener/components"
 )
 
-templ Home(addLink bool, csrf string, link *persistance.Link) {
+templ Home(addLink bool, signed_token string, link *persistance.Link) {
 	@Base(true)
 	<main class="flex my-4 flex-col gap-8 max-w-xl mx-auto">
 		<section>
-			<form class="max-w-md" action="/" method="post" hx-target="#recent" hx-post="/" hx-swap="beforeend">
+			<form class="max-w-md" action="/" method="post">
 				<div class="relative z-0 w-full mb-5 group">
 					<input
 						type="text"
@@ -28,7 +28,7 @@ templ Home(addLink bool, csrf string, link *persistance.Link) {
 					>
 						Enter URL
 					</label>
-					<input type="hidden" name="csrf-token" value={ csrf }/>
+					<input type="hidden" name="csrf-token" value={ signed_token }/>
 				</div>
 				<button
 					type="submit"
@@ -45,5 +45,13 @@ templ Home(addLink bool, csrf string, link *persistance.Link) {
 			</dl>
 		</section>
 	</main>
+	// Dummy link template for js
+	<template id="link-template">
+		@components.LinkEntry(&persistance.Link{
+			B64_code: "",
+			Href:     "",
+			Id:       0,
+			Url:      ""})
+	</template>
 	<script type="module" src="/public/js/home.js"></script>
 }
