@@ -1,25 +1,24 @@
 package views
 
 templ Base(nav bool) {
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-  <title>Link shortener by salvaft</title>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="/public/styles.css" />
-  <link rel="icon" href="/public/favicon.webp" type="image/webp" />
-</head>
-
-<body class="bg-zinc-900/80">
-  if nav {
-  <nav class="flex w-full bg-gray-800 text-blue-300 text-xl p-4">
-    <a href="/" class="ml-6">Home</a>
-  </nav>
-  }
-  { children... }
-</body>
-
-</html>
+	<!DOCTYPE html>
+	<html lang="en">
+		<head>
+			<title>Link shortener by salvaft</title>
+			<meta charset="UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<link rel="stylesheet" href="/public/styles.css"/>
+			<link rel="icon" href="/public/favicon.webp" type="image/webp"/>
+		</head>
+		<body class="bg-gray-700 grid grid-rows-[auto,1fr,auto] min-h-svh">
+			if nav {
+				<nav class="flex w-full justify-center bg-gray-800 text-blue-300 text-xl p-4">
+					<a href="/" class="ml-6  ">
+						<h1 class="text-3xl">Link shortener by salvaft</h1>
+					</a>
+				</nav>
+			}
+			{ children... }
+		</body>
+	</html>
 }
