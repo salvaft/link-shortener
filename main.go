@@ -14,7 +14,7 @@ import (
 // TODO: Add dockerfile
 // TODO: Add readme
 func main() {
-	cfg := cfg.InitConfig()
+	cfg := cfg.GetConfig()
 	mux := http.NewServeMux()
 	db := persistance.NewSQLite(cfg.DbName)
 	defer db.Close()
@@ -35,11 +35,11 @@ func main() {
 }
 
 func handleIndex(w http.ResponseWriter, r *http.Request) {
-	csrfToken, err := utils.SetCSRFToken(w)
+	signed_token, err := utils.SetCSRFToken(w)
 	if err != nil {
 		log.Printf("%-20s Error generating CSRF token. Error: %v", "handleIndex", err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
-	views.Home(false, csrfToken, nil).Render(r.Context(), w)
+	views.Home(false, signed_token, nil).Render(r.Context(), w)
 }
