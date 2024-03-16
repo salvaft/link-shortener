@@ -8,8 +8,9 @@ import (
 
 templ Home(addLink bool, signed_token string, link *persistance.Link) {
 	@Base(true)
-	<main class="flex my-4 flex-col gap-8 max-w-xl mx-auto">
+	<main class="flex my-4 flex-col h-full gap-8 pt-4 max-w-xl mx-auto px-4">
 		<section>
+			<h2 class="text-3xl text-blue-300 mb-4">Create short URL</h2>
 			<form class="max-w-md" action="/" method="post">
 				<div class="relative z-0 w-full mb-5 group">
 					<input
@@ -37,7 +38,7 @@ templ Home(addLink bool, signed_token string, link *persistance.Link) {
 			</form>
 		</section>
 		<section>
-			<h2 class="text-3xl text-teal-400 mb-4">Recent URLs</h2>
+			<h2 class="text-3xl text-blue-300 mb-4">Recent URLs</h2>
 			<dl id="recent" class="max-w-md text-gray-900 divide-y divide-gray-200 dark:text-white dark:divide-gray-700">
 				if addLink {
 					@components.LinkEntry(link)
@@ -45,6 +46,7 @@ templ Home(addLink bool, signed_token string, link *persistance.Link) {
 			</dl>
 		</section>
 	</main>
+	@components.Footer()
 	// Dummy link template for js
 	<template id="link-template">
 		@components.LinkEntry(&persistance.Link{
