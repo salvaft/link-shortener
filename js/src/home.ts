@@ -23,7 +23,7 @@ function retrieveLinkTemplate() {
 function hydrateCopyBtn(template: HTMLDivElement, link: Link) {
   const btn = template.querySelector("button") as HTMLButtonElement;
   btn.addEventListener("click", () => {
-    navigator.clipboard.writeText(link.url).then(() => {
+    navigator.clipboard.writeText(window.location + link.b64_code).then(() => {
       const defaultSpan = btn.querySelector("#default-icon") as HTMLSpanElement;
       defaultSpan.classList.remove("inline-flex");
       defaultSpan.classList.add("hidden");
