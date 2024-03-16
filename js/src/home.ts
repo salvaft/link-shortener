@@ -1,6 +1,7 @@
 interface Link {
   url: string;
   href: string;
+  b64_code: string;
 }
 
 init();
@@ -58,8 +59,7 @@ function hydrateForm(existingLinks: Link[] = []) {
     if (existingLink) {
       e.preventDefault();
       form.reset();
-      glow(existingLink);
-      // TODO: Show toaster with existing link
+      tada(existingLink);
       return;
     }
 
@@ -88,7 +88,7 @@ function hydrateForm(existingLinks: Link[] = []) {
   });
 }
 
-function glow(link: Link) {
+function tada(link: Link) {
   const el = document.querySelector(`[href="${link.href}"]`) as HTMLAnchorElement;
   const parent = el.parentElement as HTMLDivElement;
   parent.classList.add("animate-tada");
