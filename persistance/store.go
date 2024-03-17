@@ -23,6 +23,7 @@ func NewStorage(db *SQLiteDB) Store {
 	}
 }
 
+// TODO: Return link struct
 func (s *Storage) CreateLink(link string) (int, error) {
 	row, err := s.db.Exec("INSERT INTO links (url) VALUES (?)", link)
 	if err != nil {
