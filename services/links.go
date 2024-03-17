@@ -10,23 +10,22 @@ import (
 	"github.com/salvaft/go-link-shortener/persistance"
 	"github.com/salvaft/go-link-shortener/utils"
 	"github.com/salvaft/go-link-shortener/views"
-	"golang.org/x/time/rate"
 )
 
 type LinkService struct {
 	store persistance.Store
 
-	limiter *rate.Limiter
+	limiter *Limiter
 }
 
 func NewLinkService(store persistance.Store) *LinkService {
-	// 10 per second, burst of 200
-	limiter := rate.NewLimiter(rate.Limit(10), 100)
+	limiter := newLimiter()
 	return &LinkService{store, limiter}
 }
 
 func (s *LinkService) RegisterRoutes(mux *http.ServeMux) {
-	mux.HandleFunc("POST /", s.handleCreateLink)
+	mux.HandleFunc("POST /", s.limiter.WithLimitsAndValidation(s.handleCreateLinkWeb))
+	mux.HandleFunc("POST /api", s.limiter.WithLimitsAndValidation(s.handleCreateLinkAPI))
 	mux.HandleFunc("GET /{link}/", s.handleGetLink)
 }
 
@@ -48,35 +47,11 @@ func (s *LinkService) handleGetLink(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (s *LinkService) handleCreateLink(w http.ResponseWriter, r *http.Request) {
-	if !s.limiter.Allow() {
-		w.WriteHeader(http.StatusTooManyRequests)
-
-		views.ErrorView("Too many requests").Render(r.Context(), w)
-	}
+func (s *LinkService) handleCreateLink(w http.ResponseWriter, r *http.Request) (*persistance.Link, string, error) {
 	log.Printf("%-20s Request received. Path: %v", "handleCreateLink", r.URL.Path)
-	originHeader := r.Header.Get("origin")
-	// You can also compare it against the Host or X-Forwarded-Host header.
-	origin := fmt.Sprintf("http://%s:%s", cfg.GetConfig().Host, cfg.GetConfig().Port)
-	if originHeader != origin {
-		fmt.Println(originHeader, origin)
-		// Invalid request origin
-		w.WriteHeader(http.StatusForbidden)
-
-		views.ErrorView("Forbidden").Render(r.Context(), w)
-		return
-	}
-	// Validate CSRF token
-	if !utils.ValidateCSRFToken(r) {
-		w.WriteHeader(http.StatusForbidden)
-		views.ErrorView("Forbidden").Render(r.Context(), w)
-
-		log.Printf("%-20s csrf token not valid", "handleCreateLink")
-		return
-	}
 	// TODO: Validate url
 	href := r.FormValue("href")
-	var isPresent bool
+	isPresent := true
 	url_id, err := s.store.FindURL(href)
 	if _, ok := err.(*persistance.URLNotFound); ok {
 		// Should create the link
@@ -86,10 +61,9 @@ func (s *LinkService) handleCreateLink(w http.ResponseWriter, r *http.Request) {
 		log.Printf("%-20s Error checking link in db. Err: %v", "handleCreateLink", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		views.ErrorView("Unexpected Error").Render(r.Context(), w)
-		return
-	} else {
-		isPresent = true
+		return nil, "", err
 	}
+
 	if !isPresent {
 		// Creating the link
 		log.Printf("%-20s Creating new link. href: %v", "handleCreateLink", href)
@@ -98,33 +72,49 @@ func (s *LinkService) handleCreateLink(w http.ResponseWriter, r *http.Request) {
 			log.Printf("%-20s Error creating new link. Error: %v", "handleCreateLink", err)
 			w.WriteHeader(http.StatusInternalServerError)
 			views.ErrorView("Unexpected Error").Render(r.Context(), w)
-			return
+			return nil, "", err
 		}
 	}
 	url_code := utils.DecimalToBase64(url_id)
 	full_url := fmt.Sprintf("%s/%s", cfg.GetConfig().Host, url_code)
 	link := persistance.Link{B64_code: url_code, Href: href, Id: url_id, Url: full_url}
+
 	signed_token, err := utils.SetCSRFToken(w)
 	if err != nil {
 		log.Printf("%-20s Error generating CSRF token. Error: %v", "handleCreateLink", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		views.ErrorView("Internal Server Error").Render(r.Context(), w)
-		return
+		return nil, "", err
 	}
-	if r.Header.Get("X-From-Js") == "true" {
-		// w.Header().Add(, value string)
-		response := struct {
-			Signed_token string           `json:"signed_token"`
-			Link         persistance.Link `json:"link"`
-		}{signed_token, link}
-		b, err := json.Marshal(response)
-		if err != nil {
-			log.Printf("%-20s Error marshalling link. Error: %v", "handleCreateLink", err)
-		}
-		w.Header().Set("Content-Type", "application/json")
-		w.Write(b)
-		return
-	}
+	return &link, signed_token, nil
+}
 
-	views.Home(true, signed_token, &link).Render(r.Context(), w)
+func (s *LinkService) handleCreateLinkAPI(w http.ResponseWriter, r *http.Request) {
+	link, signed_token, err := s.handleCreateLink(w, r)
+	if err != nil {
+		return
+	}
+	response := struct {
+		Signed_token string           `json:"signed_token"`
+		Link         persistance.Link `json:"link"`
+	}{signed_token, *link}
+	b, err := json.Marshal(response)
+	if err != nil {
+		log.Printf("%-20s Error marshalling link. Error: %v", "handleCreateLinkAPI", err)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(b)
+}
+
+func (s *LinkService) handleCreateLinkWeb(w http.ResponseWriter, r *http.Request) {
+	link, signed_token, err := s.handleCreateLink(w, r)
+	if err != nil {
+		return
+	}
+	err = views.Home(true, signed_token, link).Render(r.Context(), w)
+	if err != nil {
+		log.Printf("%-20s Error rendering view. Error: %v", "handleCreateLinkWeb", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		views.ErrorView("Internal Server Error").Render(r.Context(), w)
+	}
 }
