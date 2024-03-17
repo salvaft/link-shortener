@@ -64,13 +64,14 @@ function hydrateForm(existingLinks: Link[] = []) {
     }
 
     try {
-      const response = await fetch("/", {
+      const response = await fetch("/api", {
         method: "POST",
         body: data,
-        headers: {
-          "X-From-Js": "true",
-        },
       });
+      if (response.status === 429) {
+        alert("Too many requests. Wait a bit and try again");
+        return;
+      }
       if (!response.ok) {
         throw new Error("Request error");
       }
