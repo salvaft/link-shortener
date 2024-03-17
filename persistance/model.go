@@ -6,3 +6,11 @@ type Link struct {
 	Url      string `json:"url"`
 	Id       int    `json:"id"`
 }
+
+type URLNotFound struct {
+	Message string
+}
+
+func (ce *URLNotFound) Error() string {
+	return ce.Message
+}
