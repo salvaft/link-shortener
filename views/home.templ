@@ -1,59 +1,49 @@
 package views
 
 import (
-	"github.com/salvaft/go-link-shortener/persistance"
+"github.com/salvaft/go-link-shortener/persistance"
 
-	"github.com/salvaft/go-link-shortener/components"
+"github.com/salvaft/go-link-shortener/components"
 )
 
 templ Home(addLink bool, signed_token string, link *persistance.Link) {
-	@Base(true)
-	<main class="flex my-4 flex-col h-full gap-8 pt-4 max-w-xl mx-auto px-4">
-		<section>
-			<h2 class="text-3xl text-blue-300 mb-4">Create short URL</h2>
-			<form class="max-w-md" action="/" method="post">
-				<div class="relative z-0 w-full mb-5 group">
-					<input
-						type="text"
-						name="href"
-						id="href"
-						class="block py-2.5 px-0 w-full text-sm text-gray-900 
+@Base(true)
+<main class="flex my-4 flex-col h-full gap-8 pt-4 max-w-xl mx-auto px-4">
+  <section class="xl:min-w-24">
+    <h2 class="text-3xl text-blue-300 mb-4">Create short URL</h2>
+    <form class="max-w-md" action="/" method="post">
+      <div class="relative z-0 w-full mb-5 group">
+        <input type="text" name="href" id="href" class="block py-2.5 px-0 w-full text-sm text-gray-900 
         autofill:!bg-transparent bg-transparent  border-0 border-b-2  border-gray-300 appearance-none auto-fill:text-gray-900 dark:auto-fill:text-white dark:text-white  dark:border-gray-600 dark:focus:border-blue-500 
-            focus:outline-none focus:ring-0 focus:border-blue-600 peer"
-						placeholder=" "
-						required
-					/>
-					<label
-						for="href"
-						class="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
-					>
-						Enter URL
-					</label>
-					<input type="hidden" name="csrf-token" value={ signed_token }/>
-				</div>
-				<button
-					type="submit"
-					class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-				>Submit</button>
-			</form>
-		</section>
-		<section>
-			<h2 class="text-3xl text-blue-300 mb-4">Recent URLs</h2>
-			<dl id="recent" class="max-w-md text-gray-900 divide-y divide-gray-200 dark:text-white dark:divide-gray-700">
-				if addLink {
-					@components.LinkEntry(link)
-				}
-			</dl>
-		</section>
-	</main>
-	@components.Footer()
-	// Dummy link template for js
-	<template id="link-template">
-		@components.LinkEntry(&persistance.Link{
-			B64_code: "",
-			Href:     "",
-			Id:       0,
-			Url:      ""})
-	</template>
-	<script type="module" src="/public/js/home.js"></script>
+            focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " required />
+        <label for="href"
+          class="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
+          Enter URL
+        </label>
+        <input type="hidden" name="csrf-token" value={ signed_token } />
+      </div>
+      <button type="submit"
+        class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Submit</button>
+    </form>
+  </section>
+  <section>
+    <h2 class="text-3xl text-blue-300 mb-4">Recent URLs</h2>
+    <dl id="recent" class="max-w-md text-gray-900 divide-y divide-gray-200 dark:text-white dark:divide-gray-700">
+      if addLink {
+      @components.LinkEntry(link)
+      }
+    </dl>
+  </section>
+  <div>{ signed_token }</div>
+</main>
+@components.Footer()
+// Dummy link template for js
+<template id="link-template">
+  @components.LinkEntry(&persistance.Link{
+  B64_code: "",
+  Href: "",
+  Id: 0,
+  Url: ""})
+</template>
+<script type="module" src="/public/js/home.js"></script>
 }
