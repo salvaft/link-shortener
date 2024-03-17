@@ -6,9 +6,9 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"net/http"
-)
 
-var secret = []byte("secret")
+	"github.com/salvaft/go-link-shortener/cfg"
+)
 
 func GenerateCSRFToken() (string, string, error) {
 	tokenBytes := make([]byte, 32)
@@ -16,10 +16,10 @@ func GenerateCSRFToken() (string, string, error) {
 	if err != nil {
 		return "", "", err
 	}
-	buffer := []byte{}
-	rand.Read(buffer)
-	csrfToken := base64.StdEncoding.EncodeToString(buffer)
-	mac := hmac.New(sha256.New, secret)
+	rand.Read(tokenBytes)
+	csrfToken := base64.StdEncoding.EncodeToString(tokenBytes)
+	secret_bytes := []byte(cfg.GetConfig().Secret)
+	mac := hmac.New(sha256.New, secret_bytes)
 	mac.Write([]byte(csrfToken))
 	csrfTokenHMAC := base64.StdEncoding.EncodeToString(mac.Sum(nil))
 	return csrfToken, csrfTokenHMAC, nil
@@ -29,7 +29,8 @@ func ValidateCSRFToken(r *http.Request) bool {
 	cookieCsrfToken, err := r.Cookie("csrf-token")
 	requestCsrfToken := r.FormValue("csrf-token")
 
-	mac := hmac.New(sha256.New, secret)
+	secret_bytes := []byte(cfg.GetConfig().Secret)
+	mac := hmac.New(sha256.New, secret_bytes)
 	mac.Write([]byte(cookieCsrfToken.Value))
 	csrfTokenHMAC := base64.StdEncoding.EncodeToString(mac.Sum(nil))
 
