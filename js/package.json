@@ -12,7 +12,6 @@
   "license": "ISC",
   "devDependencies": {
     "esbuild": "0.20.1",
-    "glob": "^10.3.10",
-    "htmx.org": "^1.9.10"
+    "glob": "^10.3.10"
   }
 }

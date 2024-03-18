@@ -11,9 +11,6 @@ devDependencies:
   glob:
     specifier: ^10.3.10
     version: 10.3.10
-  htmx.org:
-    specifier: ^1.9.10
-    version: 1.9.10
 
 packages:
 
@@ -356,10 +353,6 @@ packages:
       minimatch: 9.0.3
       minipass: 7.0.4
       path-scurry: 1.10.1
-    dev: true
-
-  /htmx.org@1.9.10:
-    resolution: {integrity: sha512-UgchasltTCrTuU2DQLom3ohHrBvwr7OqpwyAVJ9VxtNBng4XKkVsqrv0Qr3srqvM9ZNI3f1MmvVQQqK7KW/bTA==}
     dev: true
 
   /is-fullwidth-code-point@3.0.0:
