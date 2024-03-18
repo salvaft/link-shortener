@@ -8,6 +8,8 @@
 
 
 ## Startup
+```sh
 goose sqlite3 ./db.sqlite3 --dir migrations
 go mod tidy
 just run
+```
