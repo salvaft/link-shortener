@@ -1,0 +1,12 @@
+#!/sbin/openrc-run
+depend() {
+    need net
+}
+command="bin/shortener"
+directory="/opt/link-shortener"
+pidfile="/run/${RC_SVCNAME}.pid"
+command_user="sft"
+name="link-shortener"
+command_background=true
+description="link shortener app"
+export PORT={{redirect_port}}

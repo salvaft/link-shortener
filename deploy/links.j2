@@ -1,0 +1,26 @@
+server {
+  server_name nala.torocro.duckdns.org;
+  listen [::]:443 ssl; # managed by Certbot
+  listen 443 ssl; # managed by Certbot
+  include /etc/nginx/conf.d/include/header-ssl.conf;
+  include /etc/nginx/conf.d/include/common-exploits.conf;
+    ssl_certificate /etc/letsencrypt/live/links.torocro.duckdns.org/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/links.torocro.duckdns.org/privkey.pem; # managed by Certbot
+    
+	location / {
+        proxy_pass http://192.168.0.114:{{redirect_port}}/;
+    }
+
+
+
+}
+# Redirect http traffic to https and return 404 if forced via http
+server {
+   if ($host = links.torocro.duckdns.org) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+	listen 80 ;
+	listen [::]:80 ;
+    server_name links.torocro.duckdns.org;
+    return 404; # managed by Certbot
+}

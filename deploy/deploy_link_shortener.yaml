@@ -1,0 +1,80 @@
+- name: Setting port variable for nginx and node container
+  hosts:
+    - links
+    - proxy
+  vars:
+    ansible_user: root
+  tasks:
+    - name: Set golang port
+      set_fact:
+        redirect_port: 4444
+
+- hosts: localhost
+  name: Build app on localhost
+  tasks:
+    make:
+      target: build
+
+- hosts: links
+  name: Deploy app in links container
+  gather_facts: true
+  vars:
+    ansible_user: root
+  tasks:
+    - name: Stop server
+      ansible.builtin.command: rc-service link-shortener stop
+      register: my_output # <- Registers the command output.
+      changed_when: my_output.rc != 0
+      ignore_errors: true
+    - name: Service file from template
+      template:
+        src: service.j2
+        dest: /etc/init.d/link-shortener
+        mode: '0755'
+        owner: root
+        group: root
+      
+      tags: service
+    - name: Rsync copy build
+      ansible.posix.synchronize:
+        mode: push
+        src: /home/sft/dev/link-shortener/bin
+        dest: /opt/link-shortener
+      register: output
+    - name: Ouput of copying build
+      ansible.builtin.debug:
+        var: output.stdout_lines
+    - name: Rsync copy public
+      ansible.posix.synchronize:
+        mode: push
+        src: /home/sft/dev/link-shortener/public
+        dest: /opt/link-shortener
+
+
+    - name: Restart server
+      ansible.builtin.command: rc-service link-shortener
+      register: my_output # <- Registers the command output.
+      changed_when: my_output.rc != 0
+      tags: restart
+
+- hosts: proxy
+  name: nginx
+  vars:
+    ansible_user: root
+  tasks:
+    - name: Generate Nginx for links.torocro
+      template:
+        src: links.j2
+        dest: /etc/nginx/sites-available/links.torocro.conf
+
+    - name: Create a symlink to enable the site
+      file:
+        src: /etc/nginx/sites-available/links.torocro.conf
+        dest: /etc/nginx/sites-enabled/links.torocro.conf
+        state: link
+
+    - name: Reload Nginx
+      service:
+        name: nginx
+        state: reloaded
+    
