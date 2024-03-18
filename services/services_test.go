@@ -5,7 +5,7 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/salvaft/go-link-shortener/cfg"
+	"github.com/salvaft/link-shortener/cfg"
 )
 
 // TODO: Unit test with mock storage

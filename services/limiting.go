@@ -7,9 +7,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/salvaft/go-link-shortener/cfg"
-	"github.com/salvaft/go-link-shortener/utils"
-	"github.com/salvaft/go-link-shortener/views"
+	"github.com/salvaft/link-shortener/cfg"
+	"github.com/salvaft/link-shortener/utils"
+	"github.com/salvaft/link-shortener/views"
 )
 
 type (

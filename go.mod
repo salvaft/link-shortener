@@ -1,4 +1,4 @@
-module github.com/salvaft/go-link-shortener
+module github.com/salvaft/link-shortener
 
 go 1.22.0
 

@@ -7,7 +7,7 @@ import (
 	"encoding/base64"
 	"net/http"
 
-	"github.com/salvaft/go-link-shortener/cfg"
+	"github.com/salvaft/link-shortener/cfg"
 )
 
 func GenerateCSRFToken() (string, string, error) {
