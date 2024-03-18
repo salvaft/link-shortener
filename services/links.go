@@ -117,4 +117,5 @@ func (s *LinkService) handleCreateLinkWeb(w http.ResponseWriter, r *http.Request
 		w.WriteHeader(http.StatusInternalServerError)
 		views.ErrorView("Internal Server Error").Render(r.Context(), w)
 	}
+	views.Home(false, signed_token, link).Render(r.Context(), w)
 }
