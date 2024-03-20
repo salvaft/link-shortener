@@ -28,7 +28,7 @@ func main() {
 	store := persistance.NewStorage(db)
 	linkService := services.NewLinkService(store)
 	linkService.RegisterRoutes(mux)
-	log.Printf("%-20s Server running on http://%s:%s", "main", cfg.Host, cfg.Port)
+	utils.Logger.Printf("%-20s Server running on http://%s:%s", "main", cfg.Host, cfg.Port)
 	if err := http.ListenAndServe(":8000", mux); err != nil {
 		log.Fatalf("%-20s Error starting server. Error: %v", "main", err)
 	}
@@ -37,7 +37,7 @@ func main() {
 func handleIndex(w http.ResponseWriter, r *http.Request) {
 	signed_token, err := utils.SetCSRFToken(w)
 	if err != nil {
-		log.Printf("%-20s Error generating CSRF token. Error: %v", "handleIndex", err)
+		utils.Logger.Printf("%-20s Error generating CSRF token. Error: %v", "handleIndex", err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}

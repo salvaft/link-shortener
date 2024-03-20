@@ -2,7 +2,6 @@ package services
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"sync"
 	"time"
@@ -52,7 +51,7 @@ func (l *Limiter) CleanOld() {
 		l.mu.Lock()
 		for k, v := range l.registry {
 			if t.Sub(v.created) > time.Second*5 {
-				log.Printf("%-20s Cleaning token: %v", "CleanOld", k)
+				utils.Logger.Printf("%-20s Cleaning token: %v", "CleanOld", k)
 				delete(l.registry, k)
 			}
 		}
@@ -68,21 +67,21 @@ func (l *Limiter) WithLimitsAndValidation(handler http.HandlerFunc) http.Handler
 		origin := fmt.Sprintf("http://%s:%s", cfg.GetConfig().Host, cfg.GetConfig().Port)
 		if originHeader != origin {
 			// Invalid request origin
-			log.Printf("%-20s Invalid request origin", "WithLimitsAndValidation")
+			utils.Logger.Printf("%-20s Invalid request origin", "WithLimitsAndValidation")
 			w.WriteHeader(http.StatusForbidden)
 			views.ErrorView("Forbidden").Render(r.Context(), w)
 			return
 		}
 		if !utils.ValidateCSRFToken(r) {
 			w.WriteHeader(http.StatusForbidden)
-			log.Printf("%-20s csrf token not valid", "WithLimitsAndValidation")
+			utils.Logger.Printf("%-20s csrf token not valid", "WithLimitsAndValidation")
 			views.ErrorView("Forbidden").Render(r.Context(), w)
 			return
 		}
 		token := token(r.Header.Get("csrf-token"))
 		if !l.CheckLimits(token) {
 			w.WriteHeader(http.StatusTooManyRequests)
-			log.Printf("%-20s too many request with same token", "WithLimitsAndValidation")
+			utils.Logger.Printf("%-20s too many request with same token", "WithLimitsAndValidation")
 			views.ErrorView("Too many requests").Render(r.Context(), w)
 			return
 		}
