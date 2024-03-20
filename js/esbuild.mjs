@@ -7,7 +7,7 @@ await esbuild.build({
   entryPoints: tsFiles,
   format: "esm",
   platform: "browser",
-  minify: true,
+  minify: false,
   bundle: true,
   outdir: "../public/js/",
 });
