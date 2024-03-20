@@ -1,6 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: ["./views/**/*.templ}", "./**/*.templ", "**/*.ts"],
+  content: ["**/*.templ", "./js/*.ts"],
   theme: {
     extend: {
       animation: {
