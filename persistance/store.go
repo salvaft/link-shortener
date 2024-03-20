@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/salvaft/go-link-shortener/utils"
+	"github.com/salvaft/link-shortener/utils"
 )
 
 type Store interface {
